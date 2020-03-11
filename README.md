@@ -5,6 +5,9 @@ This is for use in the Spatial Neuroscience Lab at UC Irvine, for the Maze Learn
 
 Everything works at the individual scale for testing the code. Scripts are still in the process of being streamlined, compiled, and commented. See below for script/pipeline details.
 
+# dynconn_explore.sh
+Bash script to execute all the following scripts in the correct order and through all explore sessions contained in MLINDIV fmriprepped folders.
+
 # format_confs.R
 This script takes in the functional task scan's confounds.tsv file (after fMRIprep) and spits out a more structured confounds table for use in the 3dtest.sh script. 
 
