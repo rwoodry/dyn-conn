@@ -1,9 +1,14 @@
 #!/bin/bash
 
+# For any mask that you use in the 3dMaskDump:
+#	1) 3dresample -master sub033_Ex2_errts+tlrc.BRIK -prefix HO_resample -input HarvardOxford-sub-maxprob-thr25-2mm.nii.gz
+#	2) 3dAFNItoNIFTI -prefix HO_resample HO_resampl+tlrc.BRIK
+
+
 
 declare -a ScansArray=("Ex" "Ex2")
-declare -a SubjectArray=("sub-sub029" "sub-sub020" "sub-sub052" "sub-sub014" "sub-sub024" "sub-sub054" "sub-sub034" "sub-sub017" "sub-sub059" "sub-sub074" "sub-sub023" "sub-sub039" "sub-sub033" "sub-sub055" "sub-sub076" "sub-sub069" "sub-sub070" "sub-sub078" "sub-sub032" "sub-sub056" "sub-sub025" "sub-sub022" "sub-sub019" "sub-sub049" "sub-sub053" "sub-sub068" "sub-sub043" "sub-sub048" "sub-sub058" "sub-sub018" "sub-sub038" "sub-sub030" "sub-sub057" "sub-sub060" "sub-sub041" "sub-sub061" "sub-sub044" "sub-sub046" "sub-sub072" "sub-sub066" "sub-sub045" "sub-sub050" "sub-sub015" "sub-sub073" "sub-sub062" "sub-sub026" "sub-sub047" "sub-sub027" "sub-sub028" "sub-sub031" "sub-sub071" "sub-sub065")
-outdir=/home/rwoodry/DataProcessing/DynConn/
+declare -a SubjectArray=("sub-sub029" "sub-sub020" "sub-sub052") 
+#"sub-sub014" "sub-sub024" "sub-sub054" "sub-sub034" "sub-sub017" "sub-sub059" "sub-sub074" "sub-sub023" "sub-sub039" "sub-sub033" "sub-sub055" "sub-sub076" "sub-sub069" "sub-sub070" "sub-sub078" "sub-sub032" "sub-sub056" "sub-sub025" "sub-sub022" "sub-sub019" "sub-sub049" "sub-sub053" "sub-sub068" "sub-sub043" "sub-sub048" "sub-sub058" "sub-sub018" "sub-sub038" "sub-sub030" "sub-sub057" "sub-sub060" "sub-sub041" "sub-sub061" "sub-sub044" "sub-sub046" "sub-sub072" "sub-sub066" "sub-sub045" "sub-sub050" "sub-sub015" "sub-sub073" "sub-sub062" "sub-sub026" "sub-sub047" "sub-sub027" "sub-sub028" "sub-sub031" "sub-sub071" "sub-sub065")
 
 ##
 ## AFNI FOR LOOP STARTS HERE
@@ -16,6 +21,7 @@ do
 
 		subjid=$sub_ii
 		scan=$scan_ii
+		outdir=/mnt/chrastil/data2/users/liz/DynConn
 
 
 		indir=/mnt/chrastil/data2/users/liz/MLINDIV2/fmriPrepProcessed/fmriprep/${subjid}/func
@@ -60,8 +66,9 @@ do
 		##
 
 		mask=/home/rwoodry/DataProcessing/Schaefer2018_resample_100parcels.nii
-		subjdir=/home/rwoodry/DataProcessing/DynConn
-		outdir=/home/rwoodry/DataProcessing/DynConn/${subjid}_maskdump
+		mask2=/home/rwoodry/DataProcessing/HO_resample.nii
+		subjdir=/mnt/chrastil/data2/users/liz/DynConn
+		outdir=/mnt/chrastil/data2/users/liz/DynConn/${subjid}_maskdump
 		
 		if [ ! -d "$outdir" ]
 		then 
@@ -77,6 +84,19 @@ do
 		    -noijk                                                                      \
 		    -mrange $ii $ii                                                             \
 		    -o $outdir/${subjid}_${scan}_100parcels_ROI-$(printf %03d $ii).txt 						\
+		       $subjdir/${subjid}_${scan}_errts+tlrc.BRIK
+
+		done
+
+		for jj in {0..21}
+		do
+
+		    3dmaskdump                                                                  \
+		    -mask $mask2                                                                 \
+		    -xyz                                                                        \
+		    -noijk                                                                      \
+		    -mrange $jj $jj                                                             \
+		    -o $outdir/${subjid}_${scan}_21parcels_ROI-$(printf %03d $jj).txt 						\
 		       $subjdir/${subjid}_${scan}_errts+tlrc.BRIK
 
 		done
@@ -100,7 +120,7 @@ done
 # R /MyScripts/corr_3d.R
 
 ## And done up until MATLAB scripts
-## TODO Clean up scripts some more and work with Hamsi to get it executable
+## TODO Clean up scripts some more and work with Hamsi to get it executable: TEEST FOR LOOP WITH JUST 2 or 3 SUBJECTS!!!!!!!!!!!!!!
 
 
 
