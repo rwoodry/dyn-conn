@@ -1,11 +1,17 @@
-if (!require(signal)) install.packages('signal')
-if (!require(imputeTS)) install.packages('imputeTS')
+#if (!require(signal)) install.packages('signal')
+#if (!require(imputeTS)) install.packages('imputeTS')
 
 
 library(signal)     # For the butter filter
 library(imputeTS)   # For the na_interpolation function
 
-avg_filter_3d <- function(subjectid, parcels, scans = c("Ex", "Ex2"), mtn_threshold = 0.5){
+# Have this run for eeach participant. For 4each participant, grab a list of all Ex scan type (Ex, Ex2, run-1 .. run-n, etc.) assign scans <- the created scan lsit. For each one, do the Average ROI 
+args <- commandArgs()
+setwd(args[6])
+scantype <- args[7]
+print(scantype)
+
+avg_filter_3d <- function(subjectid, parcels, scans = scantype, mtn_threshold = 0.5){
   for (c in 1:length(scans)){
 
     parcelnum <- parcels
@@ -13,13 +19,13 @@ avg_filter_3d <- function(subjectid, parcels, scans = c("Ex", "Ex2"), mtn_thresh
     print(parcellabel)
 
     # Check to see if average ROI has already been calculated for this iteration. If it has, skip to next iteration
-    check_name <- sprintf("/mnt/chrastil/data2/users/liz/DynConn/avgfiltered/%s_%s_%s_avg_filtered.csv", subjectid, scans[c], parcellabel)
+    check_name <- sprintf("/mnt/chrastil/lab/users/rob/projects/MLINDIV/DynConn/output/avgfiltered/%s_%s_%s_avg_filtered.csv", subjectid, scans[c], parcellabel)
     if (file.exists(check_name)){
       print(scans[c])
       next
     }
 
-    working_dir <- sprintf("/mnt/chrastil/data2/users/liz/DynConn/%s_maskdump", subjectid)
+    working_dir <- sprintf("/mnt/chrastil/lab/users/rob/projects/MLINDIV/DynConn/%s_maskdump", subjectid)
     setwd(working_dir)
     print(working_dir)
     # Read in confounds file
@@ -70,6 +76,7 @@ avg_filter_3d <- function(subjectid, parcels, scans = c("Ex", "Ex2"), mtn_thresh
     for (i in 1:length(roi_filenames)){
 
       roi <- read.table(roi_filenames[i])
+      print(paste("reading roi file: ", roi_filenames[i]))
 
       
       # For each voxel in ROI
@@ -102,18 +109,16 @@ avg_filter_3d <- function(subjectid, parcels, scans = c("Ex", "Ex2"), mtn_thresh
     
     roi_avgs <- as.data.frame(roi_avgs)
     
-    write.csv(roi_avgs, sprintf("/mnt/chrastil/data2/users/liz/DynConn/avgfiltered/%s_%s_%s_avg_filtered.csv", subjectid, scans[c], parcellabel))
-    print(sprintf("/mnt/chrastil/data2/users/liz/DynConn/avgfiltered/%s_%s_%s_avg_filtered.csv", subjectid, scans[c], parcellabel))
+    write.csv(roi_avgs, sprintf("/mnt/chrastil/lab/users/rob/projects/MLINDIV/DynConn/avgfiltered/%s_%s_%s_avg_filtered.csv", subjectid, scans[c], parcellabel))
+    print(sprintf("/mnt/chrastil/lab/users/rob/projects/MLINDIV/DynConn/avgfiltered/%s_%s_%s_avg_filtered.csv", subjectid, scans[c], parcellabel))
   }
   
 }
 
 args <- commandArgs()
 
-subjectids <- args[6:length(args)]
+subjectid <- args[6]
 
+avg_filter_3d(subjectid, parcels = 400)
+avg_filter_3d(subjectid, parcels = 21)
 
-for (s in 1:length(subjectids)){
-  avg_filter_3d(subjectids[s], parcels = 100)
-  avg_filter_3d(subjectids[s], parcels = 21)
-}

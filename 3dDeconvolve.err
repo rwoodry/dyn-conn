@@ -1,0 +1,2 @@
+** ERROR: Regression model has too many parameters for dataset length :(
+** FATAL ERROR: 3dDeconvolve dies: Insufficient data (8) for estimating 19 parameters

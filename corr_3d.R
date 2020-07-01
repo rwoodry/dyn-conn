@@ -1,5 +1,6 @@
 # Correlation
-
+#TODO Add Magnitude Squared Coherence option along with  correlation for matrix
+#TODO Add False Discovery RAte Thresholding as option along with top n-% threshold option
 # Split into n time_windows
 library(zoo)
 library(DescTools)
@@ -7,6 +8,17 @@ library(DescTools)
 nodenodetime <- function(data, window_width = 50, window_by=48){
   rois <- data[, 6:ncol(data)]
   time_steps = ncol(rois)
+  
+  
+  if (time_steps < 674){
+    missing <- 674 - time_steps
+    last_col <- rois[, ncol(rois)]
+    
+    rois <- cbind(rois, matrix(rep(last_col, each=missing), ncol=missing, byrow=TRUE))
+    
+  } else if (time_steps > 674){
+    rois <- rois[,1:674]
+  }
   
   indices <- as.data.frame(rollapply(1:time_steps, c, width=window_width, by=window_by))
   tw_rois <- list()
@@ -66,27 +78,27 @@ nnt_threshold <- function(data, pct_threshold=.20, thresholding=TRUE, binarize=T
 dump_3darray <- function(data, roi,  session, subjectid){
   
   for(k in 1:dim(data)[3]){
-    write.table(data[,,k], sprintf("array3d_%sroi_100parcels_sub%s_%s_%03d.txt", roi, subjectid, session, k), row.names = FALSE, col.names = FALSE)
+    write.table(data[,,k], sprintf("array3d_%s_sub%s_%s_%03d.txt", parcels, subjectid, session, k), row.names = FALSE, col.names = FALSE)
   }
   
 }
 
 
-setwd("C:/Users/UCI - Robert Woodry/Desktop/Unix-Desktop/DynConnTest/subsets")
-files <- list.files()[grepl("roi_sub", list.files())]
+setwd("/home/rwoodry/DataProcessing/DynConn/avgfiltered")
+files <- list.files()[grepl("avg_filtered", list.files())]
 
 for (i in 1:length(files)){
   data <- read.csv(files[i], header=TRUE)
   
   filename <- strsplit(files[i], "_")
-  subject_id <- filename[[1]][2]
-  roi <- filename[[1]][1]
-  session <- filename[[1]][3]
+  subject_id <- filename[[1]][1]
+  parcels <- filename[[1]][3]
+  session <- filename[[1]][2]
   
   print(ncol(data))
   
   data_nnt <- nodenodetime(data)
   data_bin <- nnt_threshold(data_nnt, 0.1, binarize=FALSE)
-  dump_3darray(data_bin, roi, session, subject_id)
+  dump_3darray(data_bin, parcels, session, subject_id)
   
 }
